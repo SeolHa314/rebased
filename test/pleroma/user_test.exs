@@ -1073,6 +1073,21 @@ defmodule Pleroma.UserTest do
       assert cs.valid?
     end
 
+    test "it truncates fields" do
+      clear_config([:instance, :max_remote_account_fields], 2)
+
+      fields = [
+        %{"name" => "One", "value" => "Uno"},
+        %{"name" => "Two", "value" => "Dos"},
+        %{"name" => "Three", "value" => "Tres"}
+      ]
+
+      cs = User.remote_user_changeset(@valid_remote |> Map.put(:fields, fields))
+
+      assert [%{"name" => "One", "value" => "Uno"}, %{"name" => "Two", "value" => "Dos"}] ==
+               Ecto.Changeset.get_field(cs, :fields)
+    end
+
     test "it sets the follower_adress" do
       cs = User.remote_user_changeset(@valid_remote)
       # remote users get a fake local follower address
